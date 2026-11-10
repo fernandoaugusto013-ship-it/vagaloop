@@ -219,6 +219,8 @@ create policy "logos: admin" on public.client_logos
 
 create policy "auditoria: admin" on public.audit_logs
   for select to authenticated using (public.is_admin());
+create policy "auditoria: admin registra" on public.audit_logs
+  for insert to authenticated with check (public.is_admin() and actor_id = auth.uid());
 
 -- ---------------------------------------------------------------- tempo real
 -- O candidato assina application_status (sem colunas internas); a empresa assina applications.

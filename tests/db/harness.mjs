@@ -20,9 +20,16 @@ create schema auth;
 create schema storage;
 
 create table auth.users (
-  id uuid primary key default gen_random_uuid(),
-  email text unique,
-  raw_user_meta_data jsonb not null default '{}'
+  instance_id uuid, id uuid primary key default gen_random_uuid(), aud text, role text,
+  email text unique, encrypted_password text, email_confirmed_at timestamptz,
+  raw_app_meta_data jsonb, raw_user_meta_data jsonb not null default '{}',
+  created_at timestamptz, updated_at timestamptz,
+  confirmation_token text, recovery_token text, email_change_token_new text, email_change text
+);
+create table auth.identities (
+  id uuid primary key, user_id uuid references auth.users(id) on delete cascade, provider_id text,
+  identity_data jsonb, provider text, last_sign_in_at timestamptz, created_at timestamptz, updated_at timestamptz,
+  unique (provider_id, provider)
 );
 create function auth.uid() returns uuid language sql stable as
   $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
@@ -49,6 +56,8 @@ grant all on all tables in schema storage to anon, authenticated, service_role;
 grant execute on all functions in schema public, auth, storage, extensions to anon, authenticated, service_role;
 -- igual ao Supabase: views públicas expostas; tabelas protegidas por RLS
 `;
+
+export const SEED = join(root, "supabase", "seed.sql");
 
 export async function createDb() {
   const db = new PGlite({ extensions: { unaccent, citext, pgcrypto } });

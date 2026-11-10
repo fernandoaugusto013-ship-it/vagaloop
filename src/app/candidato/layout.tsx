@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { AppShell } from "@/components/app/shell";
 import { requireRole } from "@/lib/auth";
 
+// Área logada: sempre por requisição (sessão + RLS), nunca pré-renderizada.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Área do candidato", robots: { index: false } };
 
 export default async function CandidatoLayout({ children }: { children: React.ReactNode }) {
