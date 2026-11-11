@@ -8,7 +8,7 @@ export function AppShell({ nav, user, area, children, banner }: {
   nav: NavItem[]; user: { name: string; subtitle?: string }; area: string; children: React.ReactNode; banner?: React.ReactNode;
 }) {
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[256px_1fr]">
+    <div className="min-h-dvh lg:grid lg:grid-cols-[256px_minmax(0,1fr)]">
       <aside className="border-b border-line bg-surface lg:sticky lg:top-0 lg:h-dvh lg:border-b-0 lg:border-r">
         <div className="flex h-16 items-center justify-between px-5">
           <Logo href="/" />

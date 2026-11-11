@@ -11,6 +11,10 @@ export function HeaderAuth({ configured }: { configured: boolean }) {
   const [href, setHref] = useState<string | null>(null);
   useEffect(() => {
     if (!configured) return;
+    if (process.env.NEXT_PUBLIC_DEMO_MODE === "1") {
+      fetch("/api/demo/me").then((r) => r.json()).then((d) => d?.role && setHref(HOME[d.role]));
+      return;
+    }
     const supabase = createBrowserSupabase();
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;

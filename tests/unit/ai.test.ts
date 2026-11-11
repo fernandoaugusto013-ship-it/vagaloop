@@ -1,7 +1,7 @@
 // Roda com: npm run test:unit  (sem chave de IA, testa os modos heurísticos)
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { liaTurn } from "@/lib/ai/lia";
+import { extractTitle, liaTurn } from "@/lib/ai/lia";
 import { heuristicMatch, type MatchInput } from "@/lib/ai/match";
 import { isValidCnpj } from "@/lib/cnpj";
 import { missingFields } from "@/lib/job-schema";
@@ -21,7 +21,9 @@ test("Lia (modo básico): conversa completa gera rascunho pronto", async () => {
     const r = await liaTurn(hist, d);
     return { hist: [...hist, { role: "assistant" as const, content: r.reply }], r };
   };
-  let s = await say([{ role: "assistant", content: "Oi" }], {}, "Preciso de uma analista de dados pleno, CLT, híbrido em Recife/PE, R$ 6.000 a 7.500");
+  // o formulário começa com listas vazias, como na tela
+  const empty = { responsibilities: [], requirements: [], nice_to_have: [], benefits: [], screening_questions: [] };
+  let s = await say([{ role: "assistant", content: "Oi" }], empty, "Preciso de uma analista de dados pleno, CLT, híbrido em Recife/PE, R$ 6.000 a 7.500");
   assert.equal(s.r.draft.contract_type, "clt");
   assert.equal(s.r.draft.work_mode, "hibrido");
   assert.equal(s.r.draft.city, "Recife");
@@ -68,4 +70,12 @@ test("match heurístico: lacunas, alertas e knockout limitam o score", () => {
   const ko = heuristicMatch({ job, candidate: base, screening: [], knockout_failed: true, embedding_similarity: null });
   assert.ok(ko.score <= 30);
   assert.match(ko.alertas[0], /eliminatória/);
+});
+
+test("Lia: extrai o cargo da primeira frase", () => {
+  assert.equal(extractTitle("Preciso de um analista financeiro pleno, CLT, híbrido em Recife/PE, R$ 5.000 a 6.500"), "Analista Financeiro Pleno");
+  assert.equal(extractTitle("Preciso de uma analista de dados pleno, CLT, híbrido"), "Analista de Dados Pleno");
+  assert.equal(extractTitle("Vaga de estágio em marketing, remoto, bolsa de R$ 1.500"), "Estágio em Marketing");
+  assert.equal(extractTitle("Vendedor externo PJ em Curitiba/PR"), "Vendedor Externo");
+  assert.equal(extractTitle("Estamos contratando desenvolvedor React sênior"), "Desenvolvedor React Sênior");
 });

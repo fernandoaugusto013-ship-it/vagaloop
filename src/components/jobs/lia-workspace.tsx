@@ -27,7 +27,7 @@ export function LiaWorkspace({ companyName }: { companyName: string }) {
   const endRef = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<"chat" | "form">("chat");
 
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), [messages, pending]);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, [messages, pending]);
 
   function send(text: string) {
     const content = text.trim();

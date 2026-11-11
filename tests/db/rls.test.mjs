@@ -196,6 +196,8 @@ test("adição manual de candidato pela empresa", async () => {
   await as(db, ownerA, (tx) => tx.query(
     `insert into public.applications (job_id, external_candidate, source) values ($1, $2, 'manual')`,
     [jobPublic.id, JSON.stringify({ nome: "Fernanda Indicação", email: "fe@mail.test" })]));
+  const [m] = await rows(db, `select knockout_failed from public.applications where external_candidate->>'nome' = 'Fernanda Indicação'`);
+  assert.equal(m.knockout_failed, false, "adição manual não passa por pergunta eliminatória");
   await assert.rejects(as(db, ownerB, (tx) => tx.query(
     `insert into public.applications (job_id, external_candidate, source) values ($1, $2, 'manual')`,
     [jobPublic.id, JSON.stringify({ nome: "Intrusa" })])));

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { SITE_URL, isSupabaseConfigured } from "@/lib/env";
+import { SITE_URL, isDemo, isSupabaseConfigured } from "@/lib/env";
 import { safePath } from "@/lib/safe-redirect";
 import { TERMS_VERSION } from "@/lib/constants";
 
@@ -80,4 +80,16 @@ export async function signOut() {
     await supabase.auth.signOut();
   }
   redirect("/");
+}
+
+/** Só no modo demonstração: entra com um usuário fictício em um clique. */
+export async function demoLogin(form: FormData) {
+  if (!isDemo) redirect("/entrar");
+  const email = String(form.get("email") ?? "");
+  if (!/@(vagaloop|exemplo)\.dev$/.test(email)) redirect("/entrar");
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: "demo12345" });
+  if (error || !data.user) redirect("/entrar");
+  const { data: p } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
+  redirect(safePath(String(form.get("voltar") ?? ""), HOME[p?.role ?? "candidate"]));
 }

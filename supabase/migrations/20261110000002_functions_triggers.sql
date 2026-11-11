@@ -336,7 +336,9 @@ begin
     if new.stage_id is null then
       new.stage_id := public.first_stage_of(new.job_id);
     end if;
-    new.knockout_failed := public.knockout_failed(new.job_id, new.answers);
+    -- só quem respondeu pela plataforma passa pelo knockout; candidato adicionado pela empresa não respondeu nada
+    new.knockout_failed := coalesce(new.source, 'plataforma') = 'plataforma' and new.candidate_id is not null
+                           and public.knockout_failed(new.job_id, new.answers);
     -- campos que só a empresa/servidor definem
     if not public.is_privileged_role() and not public.can_manage_job(new.job_id) then
       new.match_score := null; new.ai_summary := null; new.ai_status := 'pendente';

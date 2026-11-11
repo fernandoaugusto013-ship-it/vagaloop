@@ -112,8 +112,8 @@ function heuristicTurn(history: ChatMessage[], draft: PartialJobDraft): LiaTurn 
   // respostas em lista para a pergunta feita
   const items = splitList(last);
   if (asked === "cargo" || (!d.title && history.filter((m) => m.role === "user").length === 1)) {
-    const title = last.split(/[.!?\n]/)[0].replace(/^(preciso|procuro|quero contratar|estou contratando|vaga (de|para))\s+(de\s+|um\s+|uma\s+)?/i, "").trim();
-    if (title.length >= 3) d.title = capitalize(title.slice(0, 120));
+    const title = extractTitle(last);
+    if (title.length >= 3) d.title = title;
     const skills = findSkills(last);
     if (skills.length && !d.requirements?.length) d.requirements = skills;
   } else if (asked === "requisitos" && items.length) {
@@ -133,8 +133,8 @@ function heuristicTurn(history: ChatMessage[], draft: PartialJobDraft): LiaTurn 
   }
 
   d.description ||= buildDescription(d);
-  d.responsibilities ??= [];
-  d.screening_questions ||= suggestQuestions(d);
+  if (!d.responsibilities?.length) d.responsibilities = [];
+  if (!d.screening_questions?.length) d.screening_questions = suggestQuestions(d);
   return {
     reply: "Pronto! Montei o rascunho com descrição e perguntas de triagem. Revise os campos ao lado e publique quando estiver tudo certo.",
     draft: d, missing, ready: true, mode: "heuristico",
@@ -148,6 +148,23 @@ function lastAsked(history: ChatMessage[]) {
 
 function splitList(s: string) {
   return s.split(/[,;\n•]|\se\s/).map((x) => x.replace(/^[\s\-–*:]+|[\s.]+$/g, "")).filter((x) => x.length > 1).slice(0, 15).map(capitalize);
+}
+
+/** "Preciso de uma analista de dados pleno, CLT, ..." → "Analista de Dados Pleno" */
+export function extractTitle(text: string) {
+  const first = text.split(/[,;:\n!?]|\s[-–]\s|\.(?!\d)/)[0];
+  const cleaned = first
+    .replace(/^\s*(oi|olá|bom dia|boa tarde)[,!\s]*/i, "")
+    .replace(/^(preciso( contratar)?|procuro|quero contratar|estou contratando|estamos contratando|buscamos|contratamos|abrir (uma )?vaga)\s+/i, "")
+    .replace(/^(de|para|por)\s+/i, "")
+    .replace(/^(vaga|uma vaga)\s+(de|para)\s+/i, "")
+    .replace(/^(um|uma|uns|umas|o|a)\s+/i, "")
+    .replace(/\s+(clt|pj|est[aá]gio|tempor[aá]rio|freela\w*|remot[oa]|h[ií]brid[oa]|presencial)\b.*$/i, "")
+    .trim();
+  const small = new Set(["de", "da", "do", "das", "dos", "e", "em", "para", "com"]);
+  return cleaned.slice(0, 120).split(/\s+/)
+    .map((w, i) => (i > 0 && small.has(w.toLowerCase()) ? w.toLowerCase() : /^[A-Z0-9]{2,}$/.test(w) ? w : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()))
+    .join(" ");
 }
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

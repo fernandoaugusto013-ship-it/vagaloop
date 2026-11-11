@@ -13,7 +13,7 @@ const NAV = [
 export function MobileMenu({ loggedHref }: { loggedHref: string | null }) {
   const [open, setOpen] = useState(false);
   const path = usePathname();
-  useEffect(() => setOpen(false), [path]);
+  useEffect(() => { setOpen(false); }, [path]);
   return (
     <div className="lg:hidden">
       <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="menu-movel" aria-label="Abrir menu"

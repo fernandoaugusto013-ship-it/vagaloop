@@ -59,3 +59,16 @@ npm run build
 ## Publicação
 
 Vercel: importe o repositório, configure as variáveis do `.env.example`. O `vercel.json` agenda `/api/cron/tarefas` a cada 10 min (reenvio de e-mails e scores pendentes) e exige `CRON_SECRET`. No plano gratuito da Vercel, cron só roda uma vez por dia; ajuste ou use outro agendador.
+
+## Modo demonstração (sem Supabase)
+
+Tour com as telas: [docs/demo](docs/demo/README.md).
+
+```bash
+npm install
+npm run demo        # abre em http://localhost:3000
+```
+
+Usa um Postgres embutido (PGlite) com **as mesmas migrações, gatilhos e regras de acesso** de produção, mais dados fictícios (`supabase/demo/95_demo_data.sql`). Na tela de login aparecem botões para entrar como empresa, candidata, admin ou recrutadora (senha `demo12345`). Os e-mails não saem: ficam visíveis em `/demo/emails`. Não há tempo real: as telas de pipeline e candidaturas se atualizam a cada 8 segundos. Os dados voltam ao início quando o servidor reinicia.
+
+Para publicar a demo na Vercel, crie um projeto a partir do repositório e defina só `NEXT_PUBLIC_DEMO_MODE=1`. Cada instância do servidor tem o próprio banco em memória, então o que você cria pode sumir quando a Vercel troca de instância.
