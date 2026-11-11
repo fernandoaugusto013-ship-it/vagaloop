@@ -8,6 +8,7 @@ import { Notice } from "@/components/ui/misc";
 import { cn } from "@/lib/cn";
 
 export function SocialButtons({ voltar, perfil }: { voltar?: string; perfil?: string }) {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === "1") return null; // login social não existe na demo
   return (
     <div className="grid gap-2 sm:grid-cols-2">
       {([["google", "Continuar com Google"], ["linkedin_oidc", "Continuar com LinkedIn"]] as const).map(([p, label]) => (

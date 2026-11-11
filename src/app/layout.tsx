@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SITE_URL } from "@/lib/env";
 import { themeScript } from "@/components/theme-toggle";
+import { DemoBanner } from "@/components/demo-banner";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-brand focus:px-4 focus:py-2 focus:text-brand-ink">
           Pular para o conteúdo
         </a>
+        <DemoBanner />
         {children}
       </body>
     </html>

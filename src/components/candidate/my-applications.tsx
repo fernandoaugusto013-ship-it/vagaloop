@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 import { candidateStageLabel } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
@@ -16,8 +17,21 @@ export type StatusRow = {
 export function MyApplications({ initial, userId }: { initial: StatusRow[]; userId: string }) {
   const [rows, setRows] = useState(initial);
   const [flash, setFlash] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
+    setRows((old) => {
+      const changed = initial.find((r) => old.find((o) => o.application_id === r.application_id && o.stage_name !== r.stage_name));
+      if (changed) { setFlash(changed.application_id); setTimeout(() => setFlash(null), 2500); }
+      return initial;
+    });
+  }, [initial]);
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_DEMO_MODE === "1") {
+      const t = setInterval(() => router.refresh(), 8000); // demo: sem Realtime, atualiza a cada 8 s
+      return () => clearInterval(t);
+    }
     const supabase = createBrowserSupabase();
     const ch = supabase.channel(`status-${userId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "application_status", filter: `candidate_id=eq.${userId}` }, (payload) => {
@@ -29,7 +43,7 @@ export function MyApplications({ initial, userId }: { initial: StatusRow[]; user
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [userId]);
+  }, [userId, router]);
 
   return (
     <ul className="space-y-3" aria-live="polite">

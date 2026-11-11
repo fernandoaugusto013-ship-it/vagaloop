@@ -21,7 +21,7 @@ export default async function CandidatoHome({ searchParams }: { searchParams: Pr
     .order("published_at", { ascending: false }).limit(4);
   if (cp?.pref_work_modes?.length) rec = rec.in("work_mode", cp.pref_work_modes);
   if (cp?.pref_contracts?.length) rec = rec.in("contract_type", cp.pref_contracts);
-  if (cp?.skills?.length) rec = rec.textSearch("search", cp.skills.slice(0, 5).join(" | "), { type: "plain", config: "portuguese" });
+  if (cp?.skills?.length) rec = rec.textSearch("search", cp.skills.slice(0, 5).map((k: string) => `"${k.replace(/"/g, "")}"`).join(" or "), { type: "websearch", config: "portuguese" });
   const applied = new Set((rows ?? []).map((r) => r.job_id));
   const { data: recJobs } = await rec;
   const recommended = ((recJobs ?? []) as JobCardData[]).filter((j) => !applied.has(j.id));

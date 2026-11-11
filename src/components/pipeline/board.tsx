@@ -23,10 +23,14 @@ export function PipelineBoard({ jobId, stages, cards: initial }: { jobId: string
   const [error, setError] = useState<string | null>(null);
   const [, start] = useTransition();
 
-  useEffect(() => setCards(initial), [initial]);
+  useEffect(() => { setCards(initial); }, [initial]);
 
   // tempo real: novas candidaturas e scores calculados aparecem sem recarregar
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_DEMO_MODE === "1") {
+      const t = setInterval(() => router.refresh(), 8000); // demo: sem Realtime, atualiza a cada 8 s
+      return () => clearInterval(t);
+    }
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
     const supabase = createBrowserSupabase();
     const ch = supabase.channel(`pipeline-${jobId}`)
@@ -67,12 +71,12 @@ export function PipelineBoard({ jobId, stages, cards: initial }: { jobId: string
               className={cn("rounded-full px-4 py-1.5 text-sm font-semibold capitalize", view === v ? "bg-brand text-brand-ink" : "text-muted hover:text-ink")}>{v}</button>
           ))}
         </div>
-        <Input aria-label="Buscar candidato" placeholder="Buscar por nome, cargo ou tag" value={q} onChange={(e) => setQ(e.target.value)} className="h-10 w-64" />
-        <Select aria-label="Aderência mínima" value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="h-10 w-44">
+        <Input aria-label="Buscar candidato" placeholder="Buscar por nome, cargo ou tag" value={q} onChange={(e) => setQ(e.target.value)} className="h-10 w-full sm:w-64" />
+        <Select aria-label="Aderência mínima" value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="h-10 w-full sm:w-56">
           <option value={0}>Qualquer aderência</option><option value={50}>Aderência ≥ 50</option><option value={70}>Aderência ≥ 70</option><option value={80}>Aderência ≥ 80</option>
         </Select>
         {view === "lista" ? (
-          <Select aria-label="Etapa" value={stageFilter} onChange={(e) => setStageFilter(e.target.value)} className="h-10 w-44">
+          <Select aria-label="Etapa" value={stageFilter} onChange={(e) => setStageFilter(e.target.value)} className="h-10 w-full sm:w-44">
             <option value="">Todas as etapas</option>{stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </Select>
         ) : null}

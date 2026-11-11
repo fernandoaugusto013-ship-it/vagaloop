@@ -4,6 +4,16 @@ import { createServerClient } from "@supabase/ssr";
 const PROTECTED = ["/empresa", "/candidato", "/recrutadora", "/admin"];
 
 export async function proxy(request: NextRequest) {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === "1") {
+    const path = request.nextUrl.pathname;
+    if (!request.cookies.get("vagaloop_demo_sessao") && PROTECTED.some((p) => path === p || path.startsWith(p + "/"))) {
+      const to = request.nextUrl.clone();
+      to.pathname = "/entrar";
+      to.search = `?voltar=${encodeURIComponent(path)}`;
+      return NextResponse.redirect(to);
+    }
+    return NextResponse.next();
+  }
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return NextResponse.next();
