@@ -62,6 +62,8 @@ Vercel: importe o repositório, configure as variáveis do `.env.example`. O `ve
 
 ## Modo demonstração (sem Supabase)
 
+Tour com as telas: [docs/demo](docs/demo/README.md).
+
 ```bash
 npm install
 npm run demo        # abre em http://localhost:3000
