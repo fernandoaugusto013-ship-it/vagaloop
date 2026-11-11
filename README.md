@@ -58,7 +58,7 @@ npm run build
 
 ## Publicação
 
-Vercel: importe o repositório, configure as variáveis do `.env.example`. O `vercel.json` agenda `/api/cron/tarefas` a cada 10 min (reenvio de e-mails e scores pendentes) e exige `CRON_SECRET`. No plano gratuito da Vercel, cron só roda uma vez por dia; ajuste ou use outro agendador.
+Vercel: importe o repositório, configure as variáveis do `.env.example`. O `vercel.json` agenda `/api/cron/tarefas` uma vez por dia, às 6h17 de Brasília (reenvio de e-mails e scores pendentes), e exige `CRON_SECRET`. É o limite do plano gratuito da Vercel; no plano Pro, mude para `*/10 * * * *` (a cada 10 minutos).
 
 ## Modo demonstração (sem Supabase)
 
